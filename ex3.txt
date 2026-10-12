@@ -1,0 +1,18 @@
+PHẦN 1: BÁO CÁO PHÂN TÍCH
+1. Sơ đồ 3 bước mô tả luồng dữ liệu (stdout -> | -> stdin):
+Luồng dữ liệu trong PowerShell đi qua 3 giai đoạn nối tiếp nhau hoàn toàn trên RAM thông qua toán tử đường ống (|):
+[Get-Content access.log] (stdout) 
+        |
+        v (Truyền qua Pipeline '|')
+[Select-String -Pattern "TIMEOUT"] (stdin -> xử lý -> stdout)
+        |
+        v (Truyền qua Pipeline '|')
+[Measure-Object -Line] (stdin -> đếm dòng -> stdout hiển thị con số duy nhất)
+PHẦN 2: TRIỂN KHAI
+1. Câu lệnh PowerShell hoàn chỉnh (cho ra một con số duy nhất):
+Get-Content access.log | Select-String -Pattern "TIMEOUT" | Measure-Object -Line | Select-Object -ExpandProperty Count
+- Giải thích các thành phần:
+  + Get-Content access.log: Đọc nội dung file log và đẩy dữ liệu ra đầu ra chuẩn (stdout).
+  + Select-String -Pattern "TIMEOUT": Nhận dữ liệu đầu vào (stdin), lọc ra các dòng chứa từ khóa "TIMEOUT" và tiếp tục đẩy các dòng khớp qua ống dẫn tiếp theo.
+  + Measure-Object -Line: Đếm tổng số dòng nhận được từ bộ lọc trước.
+  + Select-Object -ExpandProperty Count: Trích xuất trực tiếp giá trị số đếm để kết quả trả về hiển thị dạng một con số duy nhất (ví dụ: 42) thay vì bảng thông tin phức tạp.
